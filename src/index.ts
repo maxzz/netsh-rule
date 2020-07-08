@@ -3,8 +3,9 @@ import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
 import { exist, uniqueFileName, toUnix, toWindows } from './unique-names';
+import { genearateBatchFile } from './generate';
 
-type Args = {
+export type Args = {
     name: string;       // name=<Name of the rule you want >
     program: string;    // program=<”Path of the executable”>
     enable: string;     // enable=yes or no
@@ -66,8 +67,6 @@ function checkArgs() {
 
     !args.program && (args.program = args._[0]);
 
-    //
-    //TODO: name
     checkArg(args.enable, 'enable', ['yes', 'no']);
     checkArg(args.action, 'action', ['allow', 'block']);
     checkArg(args.dir, 'dir', ['in', 'out', 'both']);
@@ -94,8 +93,8 @@ function checkArgs() {
         args.files.push(args.program);
 
     }
-    //args.unix && (args.files = args.files.map(toUnix));
-    args.files = args.files.map(toWindows); // netsh accepts only back slashes
+    //args.files = args.files.map(toWindows); // netsh accepts only back slashes
+    args.files = args.files.map(path.normalize); // netsh accepts only back slashes
 
     args.files.sort((a, b) => a.length - b.length); // shortest first
     
@@ -137,38 +136,6 @@ function checkArgs() {
         });
     }
 } //checkArgs()
-
-function ruleName(fname: string): string {
-    fname = path.normalize(fname);
-    let parentfolder = path.dirname(fname).split(path.sep).pop().replace(/ /g, '_');
-    return `__generated: ${parentfolder}: ${path.basename(fname)}__`;
-}
-
-function genearateBatchFile(args: Args) { //: string[] | undefined
-    // netsh advfirewall firewall show rule name="all"
-    // netsh advfirewall firewall delete rule "<Rule Name>"
-    // to verify run wf.msc
-    const NETSH = 'netsh advfirewall firewall add rule';
-
-    let base = [
-        `enable=${args.enable}`,
-        `action=${args.action}`,
-        `profile=${args.profile}`
-    ].join(' ');
-
-    let cmds: string[]  = [];
-    args.files.forEach((_) => {
-        let name = ruleName(_);
-        if (args.dir === 'both') {
-            cmds.push(`${NETSH} dir=in  name="${name}" ${base} program="${_}"`);
-            cmds.push(`${NETSH} dir=out name="${name}" ${base} program="${_}"`);
-        } else {
-            cmds.push(`${NETSH} dir=${args.dir} name="${name}" ${base} program="${_}"`);
-        }
-    });
-    //console.log(chalk.yellow(JSON.stringify(cmds, null, 4)));
-    cmds.forEach((_) => console.log(chalk.yellow(_)));
-}
 
 function main() {
     let args = checkArgs();
