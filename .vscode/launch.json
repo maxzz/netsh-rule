@@ -30,6 +30,7 @@
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\sniffer.exe",
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\Photoshop.exe",
                 //"--unix", "false",
+                "--format", "bat",
             ]
         }
     ]
