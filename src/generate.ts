@@ -2,34 +2,48 @@ import path from "path";
 import { Args } from ".";
 import chalk from "chalk";
 
+const NETSH = 'netsh advfirewall firewall add rule';
+// netsh advfirewall firewall show rule name="all"
+// netsh advfirewall firewall delete rule "<Rule Name>"
+// to verify run wf.msc
+
+function getBase(args: Args) {
+    return [
+        `enable=${args.enable}`,
+        `action=${args.action}`,
+        `profile=${args.profile}`
+    ].join(' ');
+}
+
 function ruleName(fname: string): string {
     fname = path.normalize(fname);
     let parentfolder = path.dirname(fname).split(path.sep).pop().replace(/ /g, '_');
     return `__generated: ${parentfolder}: ${path.basename(fname)}__`;
 }
 
-export function genearateBatchFile(args: Args): string {
-    // netsh advfirewall firewall show rule name="all"
-    // netsh advfirewall firewall delete rule "<Rule Name>"
-    // to verify run wf.msc
-    const NETSH = 'netsh advfirewall firewall add rule';
+function pushLocation(args: Args, fname: string, name: string, base: string, rv: string[]) {
+    if (args.dir === 'both') {
+        rv.push(`${NETSH} dir=in  name="${name}" ${base} program="${fname}"`);
+        rv.push(`${NETSH} dir=out name="${name}" ${base} program="${fname}"`);
+    }
+    else {
+        rv.push(`${NETSH} dir=${args.dir} name="${name}" ${base} program="${fname}"`);
+    }
+}
 
-    let base = [
-        `enable=${args.enable}`,
-        `action=${args.action}`,
-        `profile=${args.profile}`
-    ].join(' ');
+export function genearateBatchFile(args: Args): string {
+
+    let base = getBase(args);
 
     let lines: string[]  = [];
-    args.files.forEach((_) => {
-        let name = ruleName(_);
+    args.files.forEach((fname) => {
+        let name = ruleName(fname);
         if (args.dir === 'both') {
-            lines.push(`rem ${path.basename(_)}`);
-            lines.push(`${NETSH} dir=in  name="${name}" ${base} program="${_}"`);
-            lines.push(`${NETSH} dir=out name="${name}" ${base} program="${_}"`);
+            lines.push(`rem ${path.basename(fname)}`);
+            pushLocation(args, fname, name, base, lines);
             lines.push('');
         } else {
-            lines.push(`${NETSH} dir=${args.dir} name="${name}" ${base} program="${_}"`);
+            pushLocation(args, fname, name, base, lines);
         }
     });
     
@@ -39,10 +53,35 @@ export function genearateBatchFile(args: Args): string {
 }
 
 export function genearatePowershellFile(args: Args): string {
+    let script = 
+`
+$user = Read-Host "Run script: (Y/n)"
+
+Write-Host "Your choice: '$user'"
+
+$locations = @()
+
+if ($user -eq 'Y' -or $user -eq '') {
+    foreach ($location in $locations) {
+        "$location"
+    }
+}
+`;
+
+    let base = getBase(args);
     let lines: string[]  = [];
-    //console.log(chalk.yellow(JSON.stringify(cmds, null, 4)));
-    // 'TODO:'
-    return lines.join('\n');
+    args.files.forEach((fname) => {
+        let name = ruleName(fname);
+        pushLocation(args, fname, name, base, lines);
+    });
+    lines = lines.map(_ => `    ${_}`);
+    let fnames = lines.join('\n')
+
+    script = script.replace('$locations = @()', `$locations = @(\n${fnames}\n)`);
+
+    console.log(chalk.yellow(script));
+
+    return script;
 }
 
 export function genearateJsFile(args: Args): string {

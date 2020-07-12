@@ -15,7 +15,7 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "console": "integratedTerminal",
+            //"console": "integratedTerminal",
             "args": [
                 //"--name", "app name",
                 //"--enable", "yes",
@@ -25,8 +25,8 @@
                 //"--program", "C:/Program Files/Bulk Rename Utility",
                 //"C:/Program Files/Bulk Rename Utility",
                 //"C:/Program Files/Adobe/Adobe Illustrator CC 2017",
-                "C:/Program Files/Adobe/Adobe Photoshop CC 2017",
-                //"C:/Program Files/Adobe/Adobe Photoshop CC 2017/sniffer.exe",
+                //"C:/Program Files/Adobe/Adobe Photoshop CC 2017",
+                "C:/Program Files/Adobe/Adobe Photoshop CC 2017/sniffer.exe",
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\sniffer.exe",
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\Photoshop.exe",
                 //"--unix", "false",

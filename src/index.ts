@@ -3,7 +3,8 @@ import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
 import { exist, uniqueFileName, toUnix, toWindows } from './unique-names';
-import { genearateBatchFile } from './generate';
+import { genearateBatchFile, genearatePowershellFile, genearateJsFile } from './generate';
+import { connect } from 'http2';
 
 export type Args = {
     name: string;       // name=<Name of the rule you want >
@@ -12,7 +13,7 @@ export type Args = {
     dir: string;        // dir=Inbound(in) or outbound(out) rule
     action: string;     // action=allow or block or custom
     profile: string;    // ( To add rule in more than one profile use “,” e.g.: profile=private, domain )
-    format: string;     // The output format: bat | ps1 | js (default is bat) // TODO:
+    format: string;     // The output format: bat | ps1 | js (default is bat)
     //                  // Generated parameters
     _: string[];        // Nameless parameters.
     files: string [];   // collected after argumnets parsed.
@@ -36,6 +37,7 @@ Options:
     --dir     - The rule is inbound or outbound: in | out | both (default: both i.e. in and out)
     --action  - The action for rule: allow | block (default: block)
     --profile - Apply rule for: public | private | domain (default: public, private, domain)
+    --format  - Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: ps1)
 `;
     //TODO: format - the output format: bat | ps1 | js (default is bat)
     //unix - convert slashes in pathes to Unix format (default true) - does not make sence anymore
@@ -50,7 +52,7 @@ Options:
 
 function checkArgs() {
     let args = minimist(process.argv.slice(2), {
-        string: ['name', 'action', 'enable', 'dir', 'profile', 'program'],
+        string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
         boolean: ['unix'],
         default: {
             name: '__Generated__', // TODO: Add last folder or filename from program
@@ -60,7 +62,7 @@ function checkArgs() {
             profile: 'public,private,domain',
             //
             files: [],
-            format: 'bat',
+            format: 'ps1',
             //unix: true,
         }
     }) as Args;
@@ -71,6 +73,7 @@ function checkArgs() {
     checkArg(args.action, 'action', ['allow', 'block']);
     checkArg(args.dir, 'dir', ['in', 'out', 'both']);
     checkArg(args.profile, 'profile', ['public', 'private', 'domain']);
+    checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
 
     //
 
@@ -101,7 +104,7 @@ function checkArgs() {
     console.log(chalk.yellow('Found exe files:'));
     console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`)}`));
 
-    args.dest = `${uniqueFileName('netsh-rules')}.txt`;
+    args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
 
     return args;
 
@@ -141,7 +144,27 @@ function main() {
     let args = checkArgs();
     //console.log(chalk.yellow(JSON.stringify(args, null, 4)));
 
-    genearateBatchFile(args);
+    let content = '';
+    switch (args.format) {
+        case 'bat': {
+            content = genearateBatchFile(args);
+            break;
+        }
+        case 'ps1': {
+            content = genearatePowershellFile(args);
+            break;
+        }
+        case 'js': {
+            content = genearateJsFile(args);
+            break;
+        }
+    }
+
+    if (connect) {
+        fs.writeFileSync(args.dest, content);
+    } else {
+        console.log(chalk.yellow('Generated nothing'));
+    }
 } //main()
 
 main();
