@@ -3,8 +3,7 @@ import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
 import { exist, uniqueFileName, toUnix, toWindows } from './unique-names';
-import { genearateBatchFile, genearatePowershellFile, genearateJsFile } from './generate';
-import { connect } from 'http2';
+import { genearateFile } from './generate';
 
 export type Args = {
     name: string;       // name=<Name of the rule you want >
@@ -37,7 +36,7 @@ Options:
     --dir     - The rule is inbound or outbound: in | out | both (default: both i.e. in and out)
     --action  - The action for rule: allow | block (default: block)
     --profile - Apply rule for: public | private | domain (default: public, private, domain)
-    --format  - Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: ps1)
+    --format  - Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: bat)
 `;
     //TODO: format - the output format: bat | ps1 | js (default is bat)
     //unix - convert slashes in pathes to Unix format (default true) - does not make sence anymore
@@ -62,7 +61,7 @@ function checkArgs() {
             profile: 'public,private,domain',
             //
             files: [],
-            format: 'ps1',
+            format: 'bat',
             //unix: true,
         }
     }) as Args;
@@ -106,6 +105,7 @@ function checkArgs() {
 
     args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
 
+    //console.log(chalk.yellow(JSON.stringify(args, null, 4)));
     return args;
 
     function collectExeFiles(folder: string, rv: string[], recursive: boolean): void {
@@ -142,25 +142,9 @@ function checkArgs() {
 
 function main() {
     let args = checkArgs();
-    //console.log(chalk.yellow(JSON.stringify(args, null, 4)));
 
-    let content = '';
-    switch (args.format) {
-        case 'bat': {
-            content = genearateBatchFile(args);
-            break;
-        }
-        case 'ps1': {
-            content = genearatePowershellFile(args);
-            break;
-        }
-        case 'js': {
-            content = genearateJsFile(args);
-            break;
-        }
-    }
-
-    if (connect) {
+    let content = genearateFile(args);
+    if (content) {
         fs.writeFileSync(args.dest, content);
     } else {
         console.log(chalk.yellow('Generated nothing'));
@@ -168,4 +152,3 @@ function main() {
 } //main()
 
 main();
-

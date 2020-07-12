@@ -2,12 +2,12 @@ import path from "path";
 import { Args } from ".";
 import chalk from "chalk";
 
-const NETSH = 'netsh advfirewall firewall add rule';
-// netsh advfirewall firewall show rule name="all"
-// netsh advfirewall firewall delete rule "<Rule Name>"
-// to verify run wf.msc
-
-function linesToArray(args: Args) {
+function fnamesToCommands(args: Args) {
+    const NETSH = 'netsh advfirewall firewall add rule';
+    // netsh advfirewall firewall show rule name="all"
+    // netsh advfirewall firewall delete rule "<Rule Name>"
+    // to verify run wf.msc
+    
     let base = getBase(args);
     let comment = args.format === 'bat' ? 'rem' : args.format === 'ps1' ? '#' : args.format === 'js' ? '//' : '???';
     
@@ -43,45 +43,82 @@ function linesToArray(args: Args) {
     }
 }
 
-export function genearateBatchFile(args: Args): string {
-    let lines: string[] = linesToArray(args);
-    
-    lines.forEach((_) => console.log(chalk.yellow(_)));
-
+function genearateBatchFile(args: Args): string {
+    let lines: string[] = fnamesToCommands(args);
     return lines.join('\n');
 }
 
-export function genearatePowershellFile(args: Args): string {
-    let script = 
-`$locations = @()
+function genearatePowershellFile(args: Args): string {
+    const TEMPLATE = 
+`$commands = @()
 
 $user = Read-Host "Run script: (Y/n)"
 
 if ($user -eq 'Y' -or $user -eq '') {
-    foreach ($location in $locations) {
+    foreach ($command in $commands) {
         Write-Host "----------------------"
         Write-Host "Creating the new rule:"
-        Write-Host $location
-        Invoke-Expression $location
+        Write-Host $command
+        Invoke-Expression $command
     }
 } else {
     Write-Host "Your choice: '$user'"
 }
 `;
 
-    let lines: string[] = linesToArray(args);
-    lines = lines.map(_ => _ === '' ? _ : _.charAt(0) === '#' ? `    ${_}` : `    '${_}'`); // add indentation and single quotes
+    let lines: string[] = fnamesToCommands(args);
+    lines = lines.map(_ => _ === '' ? _ : _.charAt(0) === '#' ? `    ${_}` : `    '${_}',`); // add indentation and single quotes
     let fnames = lines.join('\n');
+    fnames = fnames.replace(/,\n$/, '\n'); // remove the trailing comma
 
-    script = script.replace('$locations = @()', `$locations = @(\n${fnames})`);
-
-    console.log(chalk.yellow(script));
-
-    return script;
+    return TEMPLATE.replace('$commands = @()', `$commands = @(\n${fnames})`);
 }
 
-export function genearateJsFile(args: Args): string {
-    let lines: string[]  = [];
-    // 'TODO:'
-    return lines.join('\n');
+function genearateJsFile(args: Args): string {
+    const TEMPLATE = 
+`const process = require("child_process");
+
+const commands = [];
+
+for (let command of commands) {
+    console.log('----------------------');
+    console.log('Creating the new rule:');
+    console.log('    ' + command);
+    let stdout = process.execSync(command);
+    console.log(stdout.toString());
+}
+`;
+
+    let lines: string[] = fnamesToCommands(args);
+    lines = lines.map(_ => _ === '' ? _ : _.match(/^\/\//) ? `    ${_}` : `    '${_}',`); // add indentation and single quotes
+    let fnames = lines.join('\n');
+    fnames = fnames.replace(/,\n$/, '\n'); // remove the trailing comma
+
+    const locations = [];
+    for (let location of locations) {
+        console.log(`Run: ${location}`);
+    }
+
+    return TEMPLATE.replace('commands = [];', `commands = [\n${fnames}];`);
+}
+
+export function genearateFile(args: Args): string {
+    let content = '';
+    switch (args.format) {
+        case 'bat': {
+            content = genearateBatchFile(args);
+            break;
+        }
+        case 'ps1': {
+            content = genearatePowershellFile(args);
+            break;
+        }
+        case 'js': {
+            content = genearateJsFile(args);
+            break;
+        }
+    }
+    //console.log(chalk.yellow(content));
+    //return;
+    return content;
 }
