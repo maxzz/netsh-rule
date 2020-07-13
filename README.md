@@ -2,6 +2,14 @@
 
 netsh-rule will generate a file that allows to apply firewall rule to the specified application or all executables in the specified folder.
 
+## Install
+
+```npm -g i netsh-rule```
+
+or
+
+```yarn global add netsh-rule```
+
 ## Usage
 
 ```netsh-rule <filename | folder> [options]```
@@ -14,7 +22,7 @@ enable  | Enable rule: yes \| no (default: yes)
 dir     | The rule is inbound or outbound: in \| out \| both (default: both i.e. in and out)
 action  | The action for rule: allow \| block (default: block)
 profile | Apply rule for: public \| private \| domain (default: public, private, domain)
-format  | Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: bat)
+format  | Output format can be batch file, powershell, or javascript: bat \| ps1 \| js (default: bat)
 
 # \<netsh advfirewall firewall add rule> quick reference
 
