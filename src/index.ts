@@ -17,11 +17,12 @@ export type Args = {
     _: string[];        // Nameless parameters.
     files: string [];   // collected after argumnets parsed.
     dest: string;       // The destination output filename.
-    nameRoot: string;       // root folder wo/ path, or parent folder if file was specified.
+    root: string;       // root folder
+    nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 }
 
 function help(info?: string) {
-    const msg = 
+    const msg =
 `
 netsh-rules will generate a batch file to manage inbound and outbound Windows
 firewall connections for a single exe file or all exe files in folder.
@@ -48,6 +49,7 @@ Options:
 }
 
 function checkArgs() {
+    // 1. get and verify arguments
     let args = minimist(process.argv.slice(2), {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
         default: {
@@ -71,7 +73,7 @@ function checkArgs() {
     checkArg(args.profile, 'profile', ['public', 'private', 'domain']);
     checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
 
-    // prepare source files
+    // 2. prepare source files
 
     if (!args.program) {
         help('Nothing to process');
@@ -92,12 +94,14 @@ function checkArgs() {
         collectExeFiles(args.program, files, true);
         args.files = filterDuplicated(files);
         // prepare root
+        args.root = args.program;
         args.nameRoot = args.program.split(path.sep).pop().replace(/ /g, '');
     } else {
         // collect files
         args.files.push(args.program);
         // prepare root
-        args.nameRoot = path.dirname(args.program).split(path.sep).pop().replace(/ /g, '');
+        args.root = path.dirname(args.program);
+        args.nameRoot = args.root.split(path.sep).pop().replace(/ /g, '');
     }
     //args.files = args.files.map(toWindows); // netsh accepts only back slashes
     args.files = args.files.map(path.normalize); // netsh accepts only back slashes
@@ -107,7 +111,7 @@ function checkArgs() {
     console.log(chalk.yellow('Found exe files:'));
     console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`).join('')}`));
 
-    // prepate dest output filename
+    // 3. prepate dest output filename
     
     args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
 

@@ -34,7 +34,11 @@ function fnamesToCommands(args: Args) {
     return lines;
 
     function ruleName(fname: string): string {
-        return `__generated:${args.name || args.nameRoot}__${path.basename(fname)}__`;
+        let rel = path.relative(args.root, path.dirname(fname));
+        if (rel) {
+            rel += '\\';
+        }
+        return `__generated:${args.name || args.nameRoot}__${rel}${path.basename(fname)}__`;
     }
 }
 
