@@ -38,7 +38,7 @@ function fnamesToCommands(args: Args) {
         if (rel) {
             rel += '\\';
         }
-        return `__generated:${args.name || args.nameRoot}__${rel}${path.basename(fname)}__`;
+        return `__generated:${args.nameRoot}__${rel}${path.basename(fname)}__`;
     }
 }
 

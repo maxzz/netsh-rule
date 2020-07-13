@@ -65,6 +65,11 @@ function checkArgs() {
         }
     }) as Args;
 
+    if (args._.length > 1) {
+        help('Only one filename or folder can be specified');
+        process.exit(1);
+    }
+
     !args.program && (args.program = args._[0]);
 
     checkArg(args.enable, 'enable', ['yes', 'no']);
@@ -89,19 +94,20 @@ function checkArgs() {
     args.program = path.normalize(args.program);
 
     if (st.isDirectory()) {
+        // prepare root
+        args.program = args.program.replace(new RegExp(`${path.sep}${path.sep}$`), ''); // remove last slash from folder name
+        args.root = args.program;
+        args.nameRoot = args.name || args.program.split(path.sep).pop().replace(/ /g, '');
         // collect files
         let files = [];
         collectExeFiles(args.program, files, true);
         args.files = filterDuplicated(files);
-        // prepare root
-        args.root = args.program;
-        args.nameRoot = args.program.split(path.sep).pop().replace(/ /g, '');
     } else {
-        // collect files
-        args.files.push(args.program);
         // prepare root
         args.root = path.dirname(args.program);
-        args.nameRoot = args.root.split(path.sep).pop().replace(/ /g, '');
+        args.nameRoot = args.name || args.root.split(path.sep).pop().replace(/ /g, '');
+        // collect files
+        args.files.push(args.program);
     }
     //args.files = args.files.map(toWindows); // netsh accepts only back slashes
     args.files = args.files.map(path.normalize); // netsh accepts only back slashes
@@ -115,7 +121,7 @@ function checkArgs() {
     
     args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
 
-    //console.log(chalk.yellow(JSON.stringify(args, null, 4)));
+    //console.log(chalk.red(JSON.stringify(args, null, 4)));
     return args;
 
     function collectExeFiles(folder: string, rv: string[], recursive: boolean): void {
