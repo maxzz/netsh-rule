@@ -1,6 +1,6 @@
 {
     "name": "netsh-rule",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "author": "Max Zakharzhevskiy",
     "description": "Utility to generate a batch file to manage inbound and outbound Windows firewall connections for a single exe file or all exe files in folder",
     "license": "MIT",
