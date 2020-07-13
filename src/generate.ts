@@ -8,7 +8,12 @@ function fnamesToCommands(args: Args) {
     // netsh advfirewall firewall delete rule "<Rule Name>"
     // to verify run wf.msc
     
-    let base = getBase(args);
+    let base = [
+        `enable=${args.enable}`,
+        `action=${args.action}`,
+        `profile=${args.profile}`
+    ].join(' ');
+
     let comment = args.format === 'bat' ? 'rem' : args.format === 'ps1' ? '#' : args.format === 'js' ? '//' : '???';
     
     let lines: string[] = [];
@@ -28,18 +33,10 @@ function fnamesToCommands(args: Args) {
 
     return lines;
 
-    function getBase(args: Args) {
-        return [
-            `enable=${args.enable}`,
-            `action=${args.action}`,
-            `profile=${args.profile}`
-        ].join(' ');
-    }
-    
     function ruleName(fname: string): string {
         fname = path.normalize(fname);
-        let parentfolder = path.dirname(fname).split(path.sep).pop().replace(/ /g, '_');
-        return `__generated: ${parentfolder}: ${path.basename(fname)}__`;
+        let parentfolder = path.dirname(fname).split(path.sep).pop().replace(/ /g, '');
+        return `__generated:${args.name || parentfolder}__${path.basename(fname)}__`;
     }
 }
 

@@ -52,7 +52,7 @@ function checkArgs() {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
         boolean: ['unix'],
         default: {
-            name: '__Generated__',
+            name: '',
             enable: 'yes',
             action: 'block',
             dir: 'both',
