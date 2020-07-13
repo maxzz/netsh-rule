@@ -1,11 +1,42 @@
 {
-  "name": "netsh-firewall-rules",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "@types/node": "^14.0.14",
-    "chalk": "^4.1.0",
-    "minimist": "^1.2.5"
-  }
+    "name": "netsh-rule",
+    "version": "1.0.1",
+    "author": "Max Zakharzhevskiy",
+    "description": "Utility to generate a batch file to manage inbound and outbound Windows firewall connections for a single exe file or all exe files in folder",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "bin": "dist/index.js",
+    "files": [
+        "dist/**/*"
+    ],
+    "engines": {
+        "node": ">=10.16.0"
+    },
+    "keywords": [
+        "generate",
+        "netsh",
+        "batch",
+        "poswershell",
+        "javascript",
+        "typescript"
+    ],
+    "scripts": {
+        "dev": "tsc",
+        "build": "rm -rf dist && tsc",
+        "prepublish": "yarn build"
+    },
+    "dependencies": {
+        "chalk": "^4.1.0",
+        "minimist": "^1.2.5"
+    },
+    "devDependencies": {
+        "@types/node": "^14.0.14"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maxzz/netsh-rule.git"
+    },
+    "bugs": {
+        "url": "https://github.com/maxzz/netsh-rule/issues"
+    }
 }
