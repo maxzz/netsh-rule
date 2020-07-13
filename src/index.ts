@@ -17,7 +17,7 @@ export type Args = {
     _: string[];        // Nameless parameters.
     files: string [];   // collected after argumnets parsed.
     dest: string;       // The destination output filename.
-    //unix: boolean;      // Convert back slashed to slashed.
+    nameRoot: string;       // root folder wo/ path, or parent folder if file was specified.
 }
 
 function help(info?: string) {
@@ -50,16 +50,16 @@ Options:
 function checkArgs() {
     let args = minimist(process.argv.slice(2), {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
-        boolean: ['unix'],
         default: {
             name: '',
             enable: 'yes',
             action: 'block',
             dir: 'both',
             profile: 'public,private,domain',
-            //
+            // generated defaults:
             files: [],
             format: 'bat',
+            nameRoot: '',
         }
     }) as Args;
 
@@ -71,35 +71,44 @@ function checkArgs() {
     checkArg(args.profile, 'profile', ['public', 'private', 'domain']);
     checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
 
-    //
+    // prepare source files
 
     if (!args.program) {
-        help('No program to process');
+        help('Nothing to process');
         process.exit(1);
     }
 
     const st = exist(args.program);
     if (!st) {
-        help(`Program not found: ${args.program}`);
+        help(`Source not found: ${args.program}`);
         process.exit(2);
     }
 
+    args.program = path.normalize(args.program);
+
     if (st.isDirectory()) {
+        // collect files
         let files = [];
         collectExeFiles(args.program, files, true);
         args.files = filterDuplicated(files);
+        // prepare root
+        args.nameRoot = args.program.split(path.sep).pop().replace(/ /g, '');
     } else {
+        // collect files
         args.files.push(args.program);
-
+        // prepare root
+        args.nameRoot = path.dirname(args.program).split(path.sep).pop().replace(/ /g, '');
     }
     //args.files = args.files.map(toWindows); // netsh accepts only back slashes
     args.files = args.files.map(path.normalize); // netsh accepts only back slashes
 
     args.files.sort((a, b) => a.length - b.length); // shortest first
-    
-    console.log(chalk.yellow('Found exe files:'));
-    console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`)}`));
 
+    console.log(chalk.yellow('Found exe files:'));
+    console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`).join('')}`));
+
+    // prepate dest output filename
+    
     args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
 
     //console.log(chalk.yellow(JSON.stringify(args, null, 4)));

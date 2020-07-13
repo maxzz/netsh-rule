@@ -34,9 +34,7 @@ function fnamesToCommands(args: Args) {
     return lines;
 
     function ruleName(fname: string): string {
-        fname = path.normalize(fname);
-        let parentfolder = path.dirname(fname).split(path.sep).pop().replace(/ /g, '');
-        return `__generated:${args.name || parentfolder}__${path.basename(fname)}__`;
+        return `__generated:${args.name || args.nameRoot}__${path.basename(fname)}__`;
     }
 }
 
