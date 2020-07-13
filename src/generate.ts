@@ -44,8 +44,13 @@ function fnamesToCommands(args: Args) {
 }
 
 function genearateBatchFile(args: Args): string {
+    const TEMPLATE = 
+`rem lines
+if %errorlevel% neq 0 pause "Script completed with errors. Did you run as administrator?"
+`;
+
     let lines: string[] = fnamesToCommands(args);
-    return lines.join('\n');
+    return TEMPLATE.replace('rem lines', `${lines.join('\n')}`);
 }
 
 function genearatePowershellFile(args: Args): string {
@@ -65,6 +70,11 @@ if ($user -eq 'Y' -or $user -eq '') {
     Write-Host "Your choice: '$user'"
 }
 `;
+	//powershell.exe Set-ExecutionPolicy bypass
+	//powershell.exe -File "\netsh-rules 07.11.20 at 22.58.28.215.ps1"
+    //powershell.exe Set-ExecutionPolicy restricted
+    //TODO: npm package
+    //TODO: rules prefix
 
     let lines: string[] = fnamesToCommands(args);
     lines = lines.map(_ => _ === '' ? _ : _.charAt(0) === '#' ? `    ${_}` : `    '${_}',`); // add indentation and single quotes

@@ -14,6 +14,7 @@ enable  | Enable rule: yes \| no (default: yes)
 dir     | The rule is inbound or outbound: in \| out \| both (default: both i.e. in and out)
 action  | The action for rule: allow \| block (default: block)
 profile | Apply rule for: public \| private \| domain (default: public, private, domain)
+format  | Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: bat)
 
 # \<netsh advfirewall firewall add rule> quick reference
 

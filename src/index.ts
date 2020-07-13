@@ -30,7 +30,7 @@ Usage:
     netsh-rules <absolute path to filename | absolute path to folder> [options]
 
 Options:
-    --name    - The rule name (name will be generated if missing name)
+    --name    - The rule name (name will be generated from the last folder if not specified)
     --program - Absolute path to <filename | folder>
     --enable  - Enable rule: yes | no (default: yes)
     --dir     - The rule is inbound or outbound: in | out | both (default: both i.e. in and out)
@@ -38,8 +38,6 @@ Options:
     --profile - Apply rule for: public | private | domain (default: public, private, domain)
     --format  - Output format can be batch file, powershell, or javascript: bat | ps1 | js (default: bat)
 `;
-    //TODO: format - the output format: bat | ps1 | js (default is bat)
-    //unix - convert slashes in pathes to Unix format (default true) - does not make sence anymore
     console.log(chalk.gray(msg));
 
     if (info) {
@@ -54,7 +52,7 @@ function checkArgs() {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
         boolean: ['unix'],
         default: {
-            name: '__Generated__', // TODO: Add last folder or filename from program
+            name: '__Generated__',
             enable: 'yes',
             action: 'block',
             dir: 'both',
@@ -62,7 +60,6 @@ function checkArgs() {
             //
             files: [],
             format: 'bat',
-            //unix: true,
         }
     }) as Args;
 
