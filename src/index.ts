@@ -85,13 +85,15 @@ function checkArgs() {
         process.exit(1);
     }
 
+    args.program = args.program.replace(/"$/, ''); // remove quota if path is "c:\abc\" on Win10 the last \" becomes "
+    args.program = path.normalize(args.program);
+
     const st = exist(args.program);
     if (!st) {
+        console.log('st', JSON.stringify(st, null, 4));
         help(`Source not found: ${args.program}`);
         process.exit(2);
     }
-
-    args.program = path.normalize(args.program);
 
     if (st.isDirectory()) {
         // prepare root
