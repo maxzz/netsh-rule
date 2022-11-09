@@ -1,6 +1,5 @@
 import path from "path";
-import { Args } from "..";
-import chalk from "chalk";
+import { Args } from "./app-arguments";
 
 function fnamesToCommands(args: Args) {
     const NETSH = 'netsh advfirewall firewall add rule';
