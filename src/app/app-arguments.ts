@@ -1,3 +1,4 @@
+import path from "path";
 import fs from "fs";
 import minimist from 'minimist';
 import chalk from "chalk";
@@ -128,15 +129,4 @@ export function checkArgs() {
             }
         });
     }
-} //checkArgs()
-
-function minimist(arg0: string[], arg1: {
-    string: string[];
-    default: {
-        name: string; enable: string; action: string; dir: string; profile: string;
-        // generated defaults:
-        files: undefined[]; format: string; nameRoot: string;
-    };
-}): Args {
-    throw new Error("Function not implemented.");
 }
