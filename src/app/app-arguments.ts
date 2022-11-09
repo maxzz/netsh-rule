@@ -4,6 +4,7 @@ import minimist from 'minimist';
 import chalk from "chalk";
 import { exist, uniqueFileName } from "../utils/unique-names";
 import { help } from "./app-help";
+import { terminate } from "./app-errors";
 
 export type Args = {
     name: string;       // name=<Name of the rule you want >
@@ -20,11 +21,6 @@ export type Args = {
     root: string;       // root folder
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
-
-function terminate(msg: string, exitCode: number): never {
-    help(msg);
-    process.exit(1);
-}
 
 function getCliArgs(): Args {
     const args = minimist(process.argv.slice(2), {
