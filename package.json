@@ -21,7 +21,7 @@
         "typescript"
     ],
     "scripts": {
-        "dev": "tsc",
+        "dev": "tsc -w",
         "build": "rm -rf dist && tsc",
         "prepublish": "yarn build"
     },

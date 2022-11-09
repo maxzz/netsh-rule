@@ -1,9 +1,9 @@
-import minimist from 'minimist';
-import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
-import { exist, uniqueFileName, toUnix, toWindows } from './unique-names';
-import { genearateFile } from './generate';
+import minimist from 'minimist';
+import chalk from 'chalk';
+import { exist, uniqueFileName } from './utils/unique-names';
+import { genearateFile } from './app/generate';
 
 export type Args = {
     name: string;       // name=<Name of the rule you want >

@@ -1,5 +1,5 @@
 import path from "path";
-import { Args } from ".";
+import { Args } from "..";
 import chalk from "chalk";
 
 function fnamesToCommands(args: Args) {
