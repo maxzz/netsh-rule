@@ -21,9 +21,24 @@ export type Args = {
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
 
-export function checkArgs() {
-    // 1. get and verify arguments
-    let args = minimist(process.argv.slice(2), {
+function collectExeFiles(folder: string, rv: string[], recursive: boolean): void {
+    rv.push(...fs.readdirSync(folder).map((_) => {
+        let fname = path.join(folder, _);
+        let _st = fs.statSync(fname);
+        if (_st.isDirectory()) {
+            recursive && collectExeFiles(fname, rv, recursive);
+        } else {
+            return _st.isFile() && path.extname(_).toLowerCase() === '.exe' ? fname : '';
+        }
+    }).filter(Boolean));
+}
+
+function filterDuplicated(names: string[]): string[] {
+    return [...new Map(names.map(_ => [_.toLowerCase(), _])).values()]; // leave unique and preserve names case.
+}
+
+function getCliArgs(): Args {
+    const args = minimist(process.argv.slice(2), {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
         default: {
             name: '',
@@ -50,6 +65,28 @@ export function checkArgs() {
     checkArg(args.dir, 'dir', ['in', 'out', 'both']);
     checkArg(args.profile, 'profile', ['public', 'private', 'domain']);
     checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
+
+    return args;
+
+    function checkArg(value: string, name: string, allowed: string[]): void {
+        const s = (value || '').trim();
+        if (!s) {
+            help(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`);
+            process.exit(3);
+        }
+        const arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
+        arr.forEach((src) => {
+            if (!allowed.includes(src)) {
+                help(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`);
+                process.exit(3);
+            }
+        });
+    }
+}
+
+export function checkArgs(): Args {
+    // 1. get and verify arguments
+    const args = getCliArgs();
 
     // 2. prepare source files
 
@@ -98,35 +135,4 @@ export function checkArgs() {
 
     //console.log(chalk.red(JSON.stringify(args, null, 4)));
     return args;
-
-    function collectExeFiles(folder: string, rv: string[], recursive: boolean): void {
-        rv.push(...fs.readdirSync(folder).map((_) => {
-            let fname = path.join(folder, _);
-            let _st = fs.statSync(fname);
-            if (_st.isDirectory()) {
-                recursive && collectExeFiles(fname, rv, recursive);
-            } else {
-                return _st.isFile() && path.extname(_).toLowerCase() === '.exe' ? fname : '';
-            }
-        }).filter(Boolean));
-    }
-
-    function filterDuplicated(names: string[]): string[] {
-        return [...new Map(names.map(_ => [_.toLowerCase(), _])).values()]; // leave unique and preserve names case.
-    }
-
-    function checkArg(value: string, name: string, allowed: string[]): void {
-        let s = (value || '').trim();
-        if (!s) {
-            help(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`);
-            process.exit(3);
-        }
-        let arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
-        arr.forEach((src) => {
-            if (!allowed.includes(src)) {
-                help(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`);
-                process.exit(3);
-            }
-        });
-    }
 }
