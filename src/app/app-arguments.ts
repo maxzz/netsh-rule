@@ -21,6 +21,11 @@ export type Args = {
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
 
+function terminate(msg: string, exitCode: number): never {
+    help(msg);
+    process.exit(1);
+}
+
 function getCliArgs(): Args {
     const args = minimist(process.argv.slice(2), {
         string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
@@ -38,8 +43,7 @@ function getCliArgs(): Args {
     }) as Args;
 
     if (args._.length > 1) {
-        help('Only one filename or folder can be specified');
-        process.exit(1);
+        terminate('Only one filename or folder can be specified', 1);
     }
 
     !args.program && (args.program = args._[0]);
@@ -51,8 +55,7 @@ function getCliArgs(): Args {
     checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
 
     if (!args.program) {
-        help('Nothing to process');
-        process.exit(1);
+        terminate('Nothing to process', 1);
     }
 
     args.program = args.program.replace(/"$/, ''); // remove quota if path is "c:\abc\" on Win10 the last \" becomes "
@@ -63,14 +66,12 @@ function getCliArgs(): Args {
     function checkArg(value: string, name: string, allowed: string[]): void {
         const s = (value || '').trim();
         if (!s) {
-            help(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`);
-            process.exit(3);
+            terminate(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`, 3);
         }
         const arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
         arr.forEach((src) => {
             if (!allowed.includes(src)) {
-                help(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`);
-                process.exit(3);
+                terminate(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`, 3);
             }
         });
     }
@@ -101,8 +102,7 @@ export function checkArgs(): Args {
     const st = exist(args.program);
     if (!st) {
         console.log('st', JSON.stringify(st, null, 4));
-        help(`Source not found: ${args.program}`);
-        process.exit(2);
+        terminate(`Source not found: ${args.program}`, 2);
     }
 
     if (st.isDirectory()) {
