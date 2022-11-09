@@ -1,32 +1,32 @@
 import path from "path";
 import { Args } from "./app-arguments";
 
-function fnamesToCommands(args: Args) {
+function fnamesToCommands(args: Args): string[] {
     const NETSH = 'netsh advfirewall firewall add rule';
     // netsh advfirewall firewall show rule name="all"
     // netsh advfirewall firewall delete rule "<Rule Name>"
     // to verify run wf.msc
     
-    let base = [
+    const commomArgs = [
         `enable=${args.enable}`,
         `action=${args.action}`,
         `profile=${args.profile}`
     ].join(' ');
 
-    let comment = args.format === 'bat' ? 'rem' : args.format === 'ps1' ? '#' : args.format === 'js' ? '//' : '???';
+    const comment = args.format === 'bat' ? 'rem' : args.format === 'ps1' ? '#' : args.format === 'js' ? '//' : '???';
     
-    let lines: string[] = [];
+    const lines: string[] = [];
 
     args.files.forEach((fname) => {
-        let name = ruleName(fname);
+        const name = ruleName(fname);
         if (args.dir === 'both') {
             lines.push(`${comment} ${path.basename(fname)}`);
-            lines.push(`${NETSH} dir=in  name="${name}" ${base} program="${fname}"`);
-            lines.push(`${NETSH} dir=out name="${name}" ${base} program="${fname}"`);
+            lines.push(`${NETSH} dir=in  name="${name}" ${commomArgs} program="${fname}"`);
+            lines.push(`${NETSH} dir=out name="${name}" ${commomArgs} program="${fname}"`);
             lines.push('');
         }
         else {
-            lines.push(`${NETSH} dir=${args.dir} name="${name}" ${base} program="${fname}"`);
+            lines.push(`${NETSH} dir=${args.dir} name="${name}" ${commomArgs} program="${fname}"`);
         }
     });
 
@@ -47,7 +47,7 @@ function genearateBatchFile(args: Args): string {
 if %errorlevel% neq 0 pause "Script completed with errors. Did you run as administrator?"
 `;
 
-    let lines: string[] = fnamesToCommands(args);
+    const lines: string[] = fnamesToCommands(args);
     return TEMPLATE.replace('rem lines', `${lines.join('\n')}`);
 }
 
@@ -76,8 +76,7 @@ if ($user -eq 'Y' -or $user -eq '') {
 
     let lines: string[] = fnamesToCommands(args);
     lines = lines.map(_ => _ === '' ? _ : _.charAt(0) === '#' ? `    ${_}` : `    '${_}',`); // add indentation and single quotes
-    let fnames = lines.join('\n');
-    fnames = fnames.replace(/,\n$/, '\n'); // remove the trailing comma
+    const fnames = lines.join('\n').replace(/,\n$/, '\n'); // remove the trailing comma
 
     return TEMPLATE.replace('$commands = @()', `$commands = @(\n${fnames})`);
 }
@@ -99,8 +98,7 @@ for (let command of commands) {
 
     let lines: string[] = fnamesToCommands(args);
     lines = lines.map(_ => _ === '' ? _ : _.match(/^\/\//) ? `    ${_}` : `    '${_}',`); // add indentation and single quotes
-    let fnames = lines.join('\n');
-    fnames = fnames.replace(/,\n$/, '\n'); // remove the trailing comma
+    const fnames = lines.join('\n').replace(/,\n$/, '\n'); // remove the trailing comma
 
     const locations = [];
     for (let location of locations) {
@@ -127,6 +125,5 @@ export function genearateFile(args: Args): string {
         }
     }
     //console.log(chalk.yellow(content));
-    //return;
     return content;
 }

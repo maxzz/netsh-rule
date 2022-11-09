@@ -1,7 +1,7 @@
 import fs from 'fs';
 import chalk from 'chalk';
 import { checkArgs } from './app/app-arguments';
-import { genearateFile } from './app/generate';
+import { genearateFile } from './app/app-generate';
 
 function main() {
     let args = checkArgs();
@@ -10,7 +10,7 @@ function main() {
     if (content) {
         fs.writeFileSync(args.dest, content);
     } else {
-        console.log(chalk.yellow('Generated nothing'));
+        console.log(chalk.yellow('Nothing to generate.'));
     }
 }
 
