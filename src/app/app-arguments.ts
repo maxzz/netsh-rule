@@ -16,11 +16,56 @@ export type Args = {
     format: string;     // The output format: bat | ps1 | js (default is bat)
     //                  // Generated parameters
     _: string[];        // Nameless parameters.
-    files: string[];   // collected after argumnets parsed.
+    files: string[];    // collected after argumnets parsed.
     dest: string;       // The destination output filename.
     root: string;       // root folder
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
+
+export function checkArgs(): Args {
+    // 1. get and verify arguments
+    
+    const args = getCliArgs();
+
+    // 2. prepare source files
+
+    const st = exist(args.program);
+    if (!st) {
+        console.log('st', JSON.stringify(st, null, 4));
+        terminate(`Source not found: ${args.program}`, 2);
+    }
+
+    if (st.isDirectory()) {
+        // prepare root
+        args.program = args.program.replace(new RegExp(`${path.sep}${path.sep}$`), ''); // remove last slash from folder name
+        args.root = args.program;
+        args.nameRoot = args.name || args.program.split(path.sep).pop().replace(/ /g, '');
+        // collect files
+        let files = [];
+        collectRecursivelyExeFiles(args.program, files, true);
+        args.files = filterDuplicated(files);
+    } else {
+        // prepare root
+        args.root = path.dirname(args.program);
+        args.nameRoot = args.name || args.root.split(path.sep).pop().replace(/ /g, '');
+        // collect files
+        args.files.push(args.program);
+    }
+    //args.files = args.files.map(toWindows); // netsh accepts only back slashes
+    args.files = args.files.map(path.normalize); // netsh accepts only back slashes
+
+    args.files.sort((a, b) => a.length - b.length); // shortest first
+
+    console.log(chalk.yellow('Found exe files:'));
+    console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`).join('')}`));
+
+    // 3. prepate dest output filename
+
+    args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
+
+    //console.log(chalk.red(JSON.stringify(args, null, 4)));
+    return args;
+}
 
 function getCliArgs(): Args {
     const args = minimist(process.argv.slice(2), {
@@ -87,48 +132,4 @@ function collectRecursivelyExeFiles(folder: string, rv: string[], recursive: boo
 
 function filterDuplicated(names: string[]): string[] {
     return [...new Map(names.map(_ => [_.toLowerCase(), _])).values()]; // leave unique and preserve names case.
-}
-
-export function checkArgs(): Args {
-    // 1. get and verify arguments
-    const args = getCliArgs();
-
-    // 2. prepare source files
-
-    const st = exist(args.program);
-    if (!st) {
-        console.log('st', JSON.stringify(st, null, 4));
-        terminate(`Source not found: ${args.program}`, 2);
-    }
-
-    if (st.isDirectory()) {
-        // prepare root
-        args.program = args.program.replace(new RegExp(`${path.sep}${path.sep}$`), ''); // remove last slash from folder name
-        args.root = args.program;
-        args.nameRoot = args.name || args.program.split(path.sep).pop().replace(/ /g, '');
-        // collect files
-        let files = [];
-        collectRecursivelyExeFiles(args.program, files, true);
-        args.files = filterDuplicated(files);
-    } else {
-        // prepare root
-        args.root = path.dirname(args.program);
-        args.nameRoot = args.name || args.root.split(path.sep).pop().replace(/ /g, '');
-        // collect files
-        args.files.push(args.program);
-    }
-    //args.files = args.files.map(toWindows); // netsh accepts only back slashes
-    args.files = args.files.map(path.normalize); // netsh accepts only back slashes
-
-    args.files.sort((a, b) => a.length - b.length); // shortest first
-
-    console.log(chalk.yellow('Found exe files:'));
-    console.log(chalk.yellow(`${args.files.map((_) => `    ${_}\n`).join('')}`));
-
-    // 3. prepate dest output filename
-
-    args.dest = `${uniqueFileName('netsh-rules')}.${args.format}`;
-
-    //console.log(chalk.red(JSON.stringify(args, null, 4)));
-    return args;
 }
