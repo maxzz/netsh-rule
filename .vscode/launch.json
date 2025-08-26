@@ -5,7 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Program",
+            "name": "TS Launch",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
+            "args": [
+                "${workspaceFolder}/src/index.ts"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+        },
+        {
+            "name": "JS Launch",
             "type": "node",
             "request": "launch",
             "skipFiles": [

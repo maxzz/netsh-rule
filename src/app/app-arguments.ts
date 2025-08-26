@@ -24,7 +24,7 @@ export type Args = {
 
 export function checkArgs(): Args {
     // 1. get and verify arguments
-    
+
     const args = getCliArgs();
 
     // 2. prepare source files
@@ -109,12 +109,15 @@ function getCliArgs(): Args {
         if (!s) {
             terminate(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`, 3);
         }
+        
         const arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
-        arr.forEach((src) => {
-            if (!allowed.includes(src)) {
-                terminate(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`, 3);
+        arr.forEach(
+            (src) => {
+                if (!allowed.includes(src)) {
+                    terminate(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`, 3);
+                }
             }
-        });
+        );
     }
 }
 
