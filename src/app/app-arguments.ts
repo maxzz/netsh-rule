@@ -3,7 +3,7 @@ import fs from "fs";
 import minimist from 'minimist';
 import chalk from "chalk";
 import { uniqueFileName } from "../utils/unique-names";
-import { terminate } from "./app-errors";
+import { ArgsError } from "./app-errors";
 import { exist } from "../utils/utils-os";
 
 export type Args = {
@@ -21,16 +21,6 @@ export type Args = {
     root: string;       // root folder
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
-
-export class ArgsError extends Error {
-    exitCode: number;
-
-    constructor(message: string, exitCode: number) {
-        super(message);
-        this.name = 'ArgsError';
-        this.exitCode = exitCode;
-    }
-}
 
 export function checkArgs(): Args {
     // 1. get and verify arguments
