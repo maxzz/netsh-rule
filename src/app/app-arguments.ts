@@ -26,6 +26,7 @@ export function checkArgs(): Args {
     // 1. get and verify arguments
 
     const args = getCliArgs();
+    verifyMinimistArgs(args);
 
     // 2. prepare source files
 
@@ -68,21 +69,26 @@ export function checkArgs(): Args {
 }
 
 function getCliArgs(): Args {
-    const args = minimist(process.argv.slice(2), {
-        string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
-        default: {
-            name: '',
-            enable: 'yes',
-            action: 'block',
-            dir: 'both',
-            profile: 'public,private,domain',
-            // generated defaults:
-            files: [],
-            format: 'bat',
-            nameRoot: '',
-        }
-    }) as Args;
+    const rv = minimist(
+        process.argv.slice(2),
+        {
+            string: ['name', 'action', 'enable', 'dir', 'profile', 'program', 'format'],
+            default: {
+                name: '',
+                enable: 'yes',
+                action: 'block',
+                dir: 'both',
+                profile: 'public,private,domain',
+                // generated defaults:
+                files: [],
+                format: 'bat',
+                nameRoot: '',
+            }
+        }) as Args;
+    return rv;
+}
 
+function verifyMinimistArgs(args: Args) {
     if (args._.length > 1) {
         terminate('Only one filename or folder can be specified', 1);
     }
@@ -109,7 +115,7 @@ function getCliArgs(): Args {
         if (!s) {
             terminate(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`, 3);
         }
-        
+
         const arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
         arr.forEach(
             (src) => {
