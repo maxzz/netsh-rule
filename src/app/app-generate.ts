@@ -1,6 +1,26 @@
 import path from "path";
 import { Args } from "./app-arguments";
 
+export function genearateFile(args: Args): string {
+    let content = '';
+    switch (args.format) {
+        case 'bat': {
+            content = genearateBatchFile(args);
+            break;
+        }
+        case 'ps1': {
+            content = genearatePowershellFile(args);
+            break;
+        }
+        case 'js': {
+            content = genearateJsFile(args);
+            break;
+        }
+    }
+    //console.log(chalk.yellow(content));
+    return content;
+}
+
 function fnamesToCommands(args: Args): string[] {
     const NETSH = 'netsh advfirewall firewall add rule';
     // netsh advfirewall firewall show rule name="all"
@@ -106,24 +126,4 @@ for (let command of commands) {
     }
 
     return TEMPLATE.replace('commands = [];', `commands = [\n${fnames}];`);
-}
-
-export function genearateFile(args: Args): string {
-    let content = '';
-    switch (args.format) {
-        case 'bat': {
-            content = genearateBatchFile(args);
-            break;
-        }
-        case 'ps1': {
-            content = genearatePowershellFile(args);
-            break;
-        }
-        case 'js': {
-            content = genearateJsFile(args);
-            break;
-        }
-    }
-    //console.log(chalk.yellow(content));
-    return content;
 }
