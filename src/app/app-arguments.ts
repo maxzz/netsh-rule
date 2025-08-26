@@ -22,6 +22,16 @@ export type Args = {
     nameRoot: string;   // shrinked name of the root folder wo/ path, or parent folder if file was specified.
 };
 
+export class ArgsError extends Error {
+    exitCode: number;
+
+    constructor(message: string, exitCode: number) {
+        super(message);
+        this.name = 'ArgsError';
+        this.exitCode = exitCode;
+    }
+}
+
 export function checkArgs(): Args {
     // 1. get and verify arguments
 
@@ -33,7 +43,7 @@ export function checkArgs(): Args {
     const st = exist(args.program);
     if (!st) {
         console.log('st', JSON.stringify(st, null, 4));
-        terminate(`Source not found: ${args.program}`, 2);
+        throw new ArgsError(`Source not found: ${args.program}`, 2);
     }
 
     if (st.isDirectory()) {
@@ -90,7 +100,7 @@ function getCliArgs(): Args {
 
 function verifyMinimistArgs(args: Args) {
     if (args._.length > 1) {
-        terminate('Only one filename or folder can be specified', 1);
+        throw new ArgsError('Only one filename or folder can be specified', 1);
     }
 
     !args.program && (args.program = args._[0]);
@@ -102,7 +112,7 @@ function verifyMinimistArgs(args: Args) {
     checkArg(args.format, 'format', ['bat', 'ps1', 'js']);
 
     if (!args.program) {
-        terminate('Nothing to process', 1);
+        throw new ArgsError('Nothing to process', 1);
     }
 
     args.program = args.program.replace(/"$/, ''); // remove quota if path is "c:\abc\" on Win10 the last \" becomes "
@@ -113,14 +123,14 @@ function verifyMinimistArgs(args: Args) {
     function checkArg(value: string, name: string, allowed: string[]): void {
         const s = (value || '').trim();
         if (!s) {
-            terminate(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`, 3);
+            throw new ArgsError(`Required argument '${name}' is missing. Allowed values are '${allowed.join(' | ')}'`, 3);
         }
 
         const arr = s.toLowerCase().split(',').map(_ => _.trim().toLowerCase());
         arr.forEach(
             (src) => {
                 if (!allowed.includes(src)) {
-                    terminate(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`, 3);
+                    throw new ArgsError(`Invalid argument '${name} = ${value}'. Allowed values are '${allowed.join(' | ')}'`, 3);
                 }
             }
         );

@@ -1,10 +1,22 @@
 import fs from 'fs';
 import chalk from 'chalk';
-import { checkArgs } from './app/app-arguments';
+import { Args, ArgsError, checkArgs } from './app/app-arguments';
 import { genearateFile } from './app/app-generate';
+import { terminate } from './app/app-errors';
 
 function main() {
-    let args = checkArgs();
+    let args: Args;
+
+    try {
+        args = checkArgs();
+    } catch (e) {
+        if (e instanceof ArgsError) {
+            terminate(e.message, e.exitCode);
+        } else {
+            console.log(chalk.red(e.message));
+            throw e;
+        }
+    }
 
     let content = genearateFile(args);
     if (content) {
