@@ -33,11 +33,14 @@
     },
     "devDependencies": {
         "@types/node": "24.3.0",
-        "ts-node": "^10.9.2"
+        "ts-node": "^10.9.2",
+        "tsup": "^8.5.0",
+        "typescript": "^5.9.2"
     },
     "scripts": {
         "dev": "tsc -w",
         "build": "rm -rf dist && tsc",
-        "prepublish": "pnpm build"
+        "prepublish": "pnpm build",
+        "build2": "tsup src/index.ts --format cjs,esm --dts --clean --sourcemap"
     }
 }
