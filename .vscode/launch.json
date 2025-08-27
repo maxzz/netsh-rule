@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
             "args": [
-                "${workspaceFolder}/src/index.ts"
+                "${workspaceFolder}/src/index.ts",
+                //"C:/Program Files/nodejs"
             ],
             "skipFiles": [
                 "<node_internals>/**"
@@ -38,12 +39,14 @@
                 //"C:/Program Files/Bulk Rename Utility",
                 //"C:/Program Files/Adobe/Adobe Illustrator CC 2017",
                 //"C:/Program Files/Adobe/Adobe Photoshop CC 2017",
-                "C:/Program Files/Autodesk/Maya2016/", 
                 //"C:/Program Files/Adobe/Adobe Photoshop CC 2017/sniffer.exe",
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\sniffer.exe",
                 //"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017\\Photoshop.exe",
                 //"--unix", "false",
                 "--format", "bat",
+
+                //"C:/Program Files/Autodesk/Maya2016/", 
+                "C:/Program Files/nodejs",
             ]
         }
     ]
