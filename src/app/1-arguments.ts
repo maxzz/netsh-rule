@@ -2,9 +2,8 @@ import path from "path";
 import fs from "fs";
 import minimist from 'minimist';
 import chalk from "chalk";
-import { uniqueFileName } from "../utils/unique-names";
+import { exist, uniqueFileName } from "../utils";
 import { ArgsError } from "./4-errors";
-import { exist } from "../utils/utils-os";
 
 export type Args = {
     name: string;       // name=<Name of the rule you want >
