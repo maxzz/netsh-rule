@@ -1,3 +1,3 @@
-import { main } from './app/0-all';
+import { main } from './app';
 
 main();

@@ -2,6 +2,14 @@ import path from 'path';
 import fs from 'fs';
 import { exist } from './utils-os';
 
+export function uniqueFolderName(prefix: string): string {
+    return ensureNameUnique(`${getDesktopPath()}/${prefix} ${nowDayTime()}`, false);
+}
+
+export function uniqueFileName(prefix: string): string {
+    return ensureNameUnique(`${getDesktopPath()}/${prefix} ${nowDayTime()}`, true);
+}
+
 function zeros(v: string | number, total: number): string {
     // Returns v prefixed with '0's with length <= total or v as is.
     v = v ? '' + v : '';
@@ -49,12 +57,4 @@ function ensureNameUnique(name: string, nameIsFname: boolean = true): string {
         index++;
         name = `${basename} (${index})${ext}`;
     }
-} //ensureNameUnique()
-
-export function uniqueFolderName(prefix: string): string {
-    return ensureNameUnique(`${getDesktopPath()}/${prefix} ${nowDayTime()}`, false);
-}
-
-export function uniqueFileName(prefix: string): string {
-    return ensureNameUnique(`${getDesktopPath()}/${prefix} ${nowDayTime()}`, true);
 }
