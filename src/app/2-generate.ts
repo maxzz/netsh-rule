@@ -1,5 +1,5 @@
 import path from "path";
-import { Args } from "./app-arguments";
+import { Args } from "./1-arguments";
 
 export function genearateFile(args: Args): string {
     let content = '';

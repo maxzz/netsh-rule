@@ -1,4 +1,4 @@
-import { help } from "./app-help";
+import { help } from "./3-help";
 
 export function terminate(msg: string, exitCode: number): never {
     help(msg);

@@ -1,8 +1,8 @@
 import fs from 'fs';
 import chalk from 'chalk';
-import { type Args, checkArgs } from './app-arguments';
-import { genearateFile } from './app-generate';
-import { ArgsError, terminate } from './app-errors';
+import { type Args, checkArgs } from './1-arguments';
+import { genearateFile } from './2-generate';
+import { ArgsError, terminate } from './4-errors';
 
 export function main() {
     let args: Args;

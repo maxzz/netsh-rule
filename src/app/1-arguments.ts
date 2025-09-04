@@ -3,7 +3,7 @@ import fs from "fs";
 import minimist from 'minimist';
 import chalk from "chalk";
 import { uniqueFileName } from "../utils/unique-names";
-import { ArgsError } from "./app-errors";
+import { ArgsError } from "./4-errors";
 import { exist } from "../utils/utils-os";
 
 export type Args = {
